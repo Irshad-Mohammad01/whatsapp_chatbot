@@ -11,6 +11,17 @@ app = FastAPI(
     version="1.0.0"
 )
 
+from app.database.connection import DatabaseConnectionManager
+
+@app.on_event("startup")
+async def startup_db_client():
+    await DatabaseConnectionManager.initialize()
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    await DatabaseConnectionManager.close()
+
+
 # Register custom global exception handler
 @app.exception_handler(ChatbotException)
 async def chatbot_exception_handler(request: Request, exc: ChatbotException) -> JSONResponse:
@@ -29,6 +40,11 @@ async def chatbot_exception_handler(request: Request, exc: ChatbotException) -> 
         }
     )
 
+
+from fastapi.staticfiles import StaticFiles
+
+# Mount Static Files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Register Webhook Router
 app.include_router(webhook_router)

@@ -6,14 +6,14 @@ from fastapi.responses import PlainTextResponse, JSONResponse
 from app.schemas import WhatsAppWebhookPayload
 from app.utils import verify_webhook, verify_signature, extract_message
 from app.whatsapp_client import WhatsAppClient
-from app.ai_client import GeminiClient
-from app.exceptions import InvalidPayloadError
+from app.exceptions import InvalidPayloadError, ChatbotException
+from app.services.ai_service import AIService
 
 router = APIRouter(prefix="/webhook", tags=["Webhook"])
 
 # Instantiate service clients
 whatsapp_client = WhatsAppClient()
-gemini_client = GeminiClient()
+ai_service = AIService()
 
 
 @router.get("", response_class=PlainTextResponse)
@@ -71,17 +71,20 @@ async def post_webhook_events(
                 content={"status": "ignored", "detail": "Event type ignored (not an incoming text message)."}
             )
 
-        # 3.4. Generate reply with Gemini API
-        ai_reply = await gemini_client.generate_ai_response(
-            user_message=extracted.message_text,
-            sender_name=extracted.sender_name
+        # 3.4. Generate reply with AI Service (Orchestrator for Stage 2)
+        ai_reply = await ai_service.process_user_message(
+            message_text=extracted.message_text,
+            sender_name=extracted.sender_name,
+            sender_phone=extracted.sender_phone
         )
+        print(f"Chatbot response to '{extracted.message_text}':\n{ai_reply}\n---")
 
         # 3.5. Dispatch message back to sender via Meta API
-        await whatsapp_client.send_whatsapp_message(
-            recipient_phone=extracted.sender_phone,
-            message_text=ai_reply
-        )
+        if ai_reply:
+            await whatsapp_client.send_whatsapp_message(
+                recipient_phone=extracted.sender_phone,
+                message_text=ai_reply
+            )
 
         return JSONResponse(
             status_code=200,

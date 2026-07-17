@@ -65,3 +65,18 @@ class ExtractedMessage(BaseModel):
     sender_phone: str
     sender_name: str
     message_text: str
+
+
+class Product(BaseModel):
+    """
+    Pydantic model representing a product from the database.
+    """
+    id: str
+    name: str
+    category: str
+    price: float
+    description: str
+    availability: str
+    image_url: str
+    website_url: Optional[str] = None
+

@@ -2,15 +2,13 @@ import hmac
 import hashlib
 import json
 import httpx
-
-# Read settings from Pydantic settings by importing config
-import os
 import sys
+import os
+
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 from app.config import settings
 
-def run_simulation():
-    # 1. Define the payload matching Meta's structure
+def send_payload(message_text: str):
     payload = {
         "object": "whatsapp_business_account",
         "entry": [
@@ -29,18 +27,16 @@ def run_simulation():
                                     "profile": {
                                         "name": "Irshad Mohammad"
                                     },
-                                    "wa_id": "919829276750",
-                                    "user_id": "IN.2532435220604858"
+                                    "wa_id": "919829276750"
                                 }
                             ],
                             "messages": [
                                 {
                                     "from": "919829276750",
-                                    "from_user_id": "IN.2532435220604858",
                                     "id": "wamid.HBgMOTE5Mjc2NzUwRlQxMjM0NTY3ODkw",
                                     "timestamp": "1783751322",
                                     "text": {
-                                        "body": "Show me rings"
+                                        "body": message_text
                                     },
                                     "type": "text"
                                 }
@@ -54,22 +50,18 @@ def run_simulation():
     }
 
     payload_bytes = json.dumps(payload).encode("utf-8")
-
-    # 2. Compute HMAC SHA-256 signature using APP_SECRET
     computed_sig = hmac.new(
         key=settings.APP_SECRET.encode("utf-8"),
         msg=payload_bytes,
         digestmod=hashlib.sha256
     ).hexdigest()
     
-    signature_header = f"sha256={computed_sig}"
-    
     headers = {
         "Content-Type": "application/json",
-        "X-Hub-Signature-256": signature_header
+        "X-Hub-Signature-256": f"sha256={computed_sig}"
     }
 
-    print("Sending webhook payload to local server...")
+    print(f"\n--- Testing message: \"{message_text}\" ---")
     try:
         response = httpx.post(
             "http://127.0.0.1:8000/webhook",
@@ -77,13 +69,22 @@ def run_simulation():
             headers=headers,
             timeout=15.0
         )
-        print(f"Status Code: {response.status_code}")
-        print("Response JSON:")
-        print(response.json())
+        print(f"Response Status Code: {response.status_code}")
+        print("Response Content:")
+        print(response.text)
     except Exception as e:
-        print("Failed to send request or retrieve response:")
-        import traceback
-        traceback.print_exc()
+        print(f"Request failed: {e}")
 
 if __name__ == "__main__":
-    run_simulation()
+    test_cases = [
+        "Hii",
+        "Show me gold rings under 20000",
+        "Show engagement rings",
+        "Show earrings",
+        "Show me some diamond necklaces",
+        "Show me watches",
+        "Track my order SJ10241",
+        "Can you create a support ticket for a damaged ring?"
+    ]
+    for test in test_cases:
+        send_payload(test)

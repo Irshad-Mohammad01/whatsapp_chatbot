@@ -34,3 +34,9 @@ class GeminiAPIError(ChatbotException):
     """Raised when the call to Google Gemini's generation API fails."""
     def __init__(self, message: str, status_code: int = 502):
         super().__init__(f"Gemini API error: {message}", status_code)
+
+
+class DatabaseConnectionError(Exception):
+    """Raised when database connection fails."""
+    pass
+

@@ -25,6 +25,42 @@ class Settings(BaseSettings):
         default=500,
         description="Gemini model max output tokens"
     )
+    DATABASE_URL: str = Field(
+        default="postgresql://neondb_owner:npg_GOsy48HeAJhP@ep-bold-base-ao7v7l2l-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+        description="Neon PostgreSQL Database Connection URI"
+    )
+    SESSION_TIMEOUT_SECONDS: int = Field(
+        default=30,
+        description="Session inactivity timeout in seconds"
+    )
+    WEBSITE_URL: str = Field(
+        default="https://ssjewellery.com",
+        description="Main production website URL"
+    )
+    DEMO_WEBSITE_URL: str = Field(
+        default="https://demo.ssjewellery.com",
+        description="Demo/dev website URL for tracking"
+    )
+    WELCOME_LOGO_URL: str = Field(
+        default="",
+        description="SSJewellery Welcome Logo URL"
+    )
+    WELCOME_LOGO_CAPTION: str = Field(
+        default=(
+            "💎 Welcome to SSJewellery\n\n"
+            "Hello, Sir/Madam! 👋\n\n"
+            "Thank you for choosing SSJewellery.\n\n"
+            "We're committed to providing you with an exceptional shopping experience.\n\n"
+            "Our assistant is here to help you every step of the way.\n\n"
+            "Available Services\n\n"
+            "🔎 Explore Our Collection\n"
+            "📦 Track Your Orders\n"
+            "💬 Customer Support\n"
+            "💎 Product Recommendations\n\n"
+            "Please choose an option below to get started."
+        ),
+        description="SSJewellery Welcome Logo Caption"
+    )
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
