@@ -26,8 +26,8 @@ class Settings(BaseSettings):
         description="Gemini model max output tokens"
     )
     DATABASE_URL: str = Field(
-        default="postgresql://neondb_owner:npg_GOsy48HeAJhP@ep-bold-base-ao7v7l2l-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-        description="Neon PostgreSQL Database Connection URI"
+        ...,
+        description="PostgreSQL Database Connection URI"
     )
     SESSION_TIMEOUT_SECONDS: int = Field(
         default=30,
